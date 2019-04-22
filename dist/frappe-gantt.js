@@ -1065,76 +1065,100 @@ class Popup {
             position_meta = options.target_element.getBBox();
         }
 
-        var container_meta = gantt.getBoundingClientRect();
-        var svg_meta = this.gantt.$svg.getBoundingClientRect();
-        var relX = (position_meta.x + svg_meta.x) - container_meta.x;
-        var relY = (position_meta.y + svg_meta.y) - container_meta.y;
-        var popup_width = this.parent.offsetWidth;
-        var popup_height = this.parent.offsetHeight;
-
-        var exceeds_top = (relY - popup_height) < 0;
-        var exceeds_right = (relX + popup_width + position_meta.width) > container_meta.width;
-        var exceeds_bottom = (relY + popup_height + position_meta.height) > container_meta.height;
-        var exceeds_left = (relX - popup_width) < 0;
-
-        if(exceeds_top){
-          options.position = 'bottom';
-        }
-        if(exceeds_bottom){
-          options.position = 'top';
-        }
-        if(exceeds_left || (exceeds_top && exceeds_left) || exceeds_bottom && exceeds_left){
-          options.position = 'right';
-        }
-        if(exceeds_top && exceeds_right || exceeds_right || (exceeds_right && exceeds_bottom)){
-          options.position = 'left';
+        var in_bounds = this.set_position(options.position, position_meta, false);
+        if(!in_bounds && this.gantt.options.popup_in_bounds){
+          this.set_position(options.position, position_meta, true);
         }
 
+    }
 
-        if (options.position === 'left') {
-            this.parent.style.left = position_meta.x - (this.parent.offsetWidth + 10) + 'px';
-            this.parent.style.top = position_meta.y - (10) + 'px';
+    set_position(position, position_meta, auto) {
+      var container_meta = gantt.getBoundingClientRect();
+      var oob;
+      this.pointer.style = null;
 
-            this.pointer.style = null;
-            this.pointer.style.transform = 'rotateZ(270deg)';
-            this.pointer.style.right = '-12px';
-            this.pointer.style.top = '15px';
+      if (position === 'right' || auto) {
+        this.parent.style.left = position_meta.x + (position_meta.width + 10) + 'px';
+        this.parent.style.top = position_meta.y - (10) + 'px';
+        var popup_meta = this.parent.getBoundingClientRect();
+        if(this.exceeds_bounds(popup_meta, container_meta)){
+          if(auto) {
+            position = 'top';
+          }else{
+            return false;
+          }
+        }else{
+          this.pointer.style.transform = 'rotateZ(90deg)';
+          this.pointer.style.left = '-7px';
+          this.pointer.style.top = '15px';
+          return position
         }
+      }
 
-        if (options.position === 'right') {
-            this.parent.style.left = position_meta.x + (position_meta.width + 10) + 'px';
-            this.parent.style.top = position_meta.y - (10) + 'px';
-
-            this.pointer.style = null;
-            this.pointer.style.transform = 'rotateZ(90deg)';
-            this.pointer.style.left = '-7px';
-            this.pointer.style.top = '15px';
+      if (position === 'top' || auto) {
+        this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
+        this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
+        var popup_meta = this.parent.getBoundingClientRect();
+        if(this.exceeds_bounds(popup_meta, container_meta)){
+          if(auto) {
+            position = 'left';
+          }else{
+            return false;
+          }
+        }else{
+          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+          this.pointer.style.bottom = '-12px';
+          return position;
         }
+      }
 
-        if (options.position === 'top') {
-            this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
-            this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
-
-            this.pointer.style = null;
-            this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
-            this.pointer.style.bottom = '-12px';
+      if (position === 'left' || auto) {
+        this.parent.style.left = position_meta.x - (this.parent.offsetWidth + 10) + 'px';
+        this.parent.style.top = position_meta.y - (10) + 'px';
+        var popup_meta = this.parent.getBoundingClientRect();
+        if(this.exceeds_bounds(popup_meta, container_meta)){
+          if(auto) {
+            position = 'bottom';
+          }else{
+            return false;
+          }
+        }else{
+          this.pointer.style.transform = 'rotateZ(270deg)';
+          this.pointer.style.right = '-12px';
+          this.pointer.style.top = '15px';
+          return position;
         }
+      }
 
-        if (options.position === 'bottom') {
-            this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
-            this.parent.style.top = position_meta.y + (position_meta.height + 10) + 'px';
-
-            this.pointer.style = null;
-            this.pointer.style.transform = 'rotateZ(180deg)';
-            this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
-            this.pointer.style.top = '-12px';
+      if (position === 'bottom' || auto) {
+        this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
+        this.parent.style.top = position_meta.y + (position_meta.height + 10) + 'px';
+        var popup_meta = this.parent.getBoundingClientRect();
+        if(this.exceeds_bounds(popup_meta, container_meta)){
+          if(auto) {
+            //console.log('all postions OOB');
+          }else{
+            return false;
+          }
+        }else{
+          this.pointer.style.transform = 'rotateZ(180deg)';
+          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+          this.pointer.style.top = '-12px';
+          return position;
         }
+      }
+
+    }
+
+    exceeds_bounds(popup_meta, container_meta) {
+      return popup_meta.left < container_meta.left || popup_meta.right > container_meta.right || popup_meta.top < container_meta.top || popup_meta.bottom > container_meta.bottom;
     }
 
     hide() {
     	// SJ fix popup overlaying bars
     	this.parent.style.display = 'none';
     }
+
 }
 
 class Gantt {
