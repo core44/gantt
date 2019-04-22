@@ -113,7 +113,7 @@ var date_utils = {
     	var localMonthNames = month_names[lang];
     	if(localMonthNames == null)
     		localMonthNames = month_names['en'];
-    	
+
         const values = this.get_date_values(date).map(d => padStart(d, 2, 0));
         const format_map = {
             YYYY: values[0],
@@ -435,7 +435,7 @@ class Bar {
 		this.clickDelay = 500;
 		this.clicks = 0;
 		this.timer = null;
-    	
+
         this.invalid = this.task.invalid;
         this.height = this.gantt.options.bar_height;
         this.x = this.compute_x();
@@ -540,7 +540,7 @@ class Bar {
 
         const bar = this.$bar;
         const handle_width = 8;
-        
+
         // SJ make changing todos optional
         if(this.gantt.options.enable_slide_edit){
         	createSVG('rect', {
@@ -565,7 +565,7 @@ class Bar {
         		append_to: this.handle_group
         	});
         }
-        
+
         // SJ make changing progress optional
         if ((this.task.progress && this.task.progress < 100) && this.gantt.options.enable_progress_edit) {
         	this.$handle_progress = createSVG('polygon', {
@@ -605,7 +605,7 @@ class Bar {
             }
 
             this.gantt.unselect_all();
-            
+
             // SJ add dependency by popup button
             if(this.gantt.dependencyBar != null){
             	this.add_dependency();
@@ -622,9 +622,9 @@ class Bar {
 		var markedTask = this.gantt.dependencyBar.task;
 		if(markedTask == null)
 			return;
-		
+
 		var changedTask;
-		
+
 		// check if tasks are already connected
 		if(!this.task.dependencies.includes(markedTask.id) && !markedTask.dependencies.includes(this.task.id) && this.task !== markedTask){
 			// same start date no dependency
@@ -632,7 +632,7 @@ class Bar {
 	    		this.release_marked_bar();
 				return;
 			}
-			
+
 			// check which task starts later
 			if(this.task._start.getTime() > markedTask._start.getTime()){
 				changedTask = this.task;
@@ -641,7 +641,7 @@ class Bar {
 				changedTask = markedTask;
 				markedTask.dependencies.push(this.task.id);
 			}
-		
+
 			// fire dependencyAdded event
 			this.gantt.trigger_event('dependency_added', [changedTask]);
 	      	// recalculate dependency tree
@@ -658,7 +658,7 @@ class Bar {
     	// empty gantt variable
     	this.gantt.dependencyBar = null;
     }
-    
+
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
@@ -737,7 +737,7 @@ class Bar {
     set_action_completed() {
         this.action_completed = true;
         var bar = this;
-        
+
         setTimeout(() => (this.action_completed = false), 1000);
     }
 
@@ -883,7 +883,7 @@ class Arrow {
         if(this.gantt.options.enable_dependency_edit)
         	this.setup_eventListener();
     }
-    
+
     calculate_path() {
         let start_x =
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
@@ -954,7 +954,7 @@ class Arrow {
                 l -5 5`;
         }
     }
-    
+
     draw() {
         this.element = createSVG('path', {
             d: this.path,
@@ -967,7 +967,7 @@ class Arrow {
         this.calculate_path();
         this.element.setAttribute('d', this.path);
     }
-    
+
     // SJ add event handling for Arrows
     setup_eventListener(){
         $.on(this.element, 'click', e => {
@@ -1018,8 +1018,12 @@ class Popup {
         if (!options.target_element) {
             throw new Error('target_element is required to show popup');
         }
-        if (!options.position) {
-            options.position = 'left';
+        if(this.gantt.options.popup_position){
+          options.position = this.gantt.options.popup_position;
+        }else{
+          if (!options.position) {
+              options.position = 'right';
+          }
         }
         const target_element = options.target_element;
 
@@ -1036,12 +1040,12 @@ class Popup {
             if(this.gantt.options.enable_dependency_edit){
                 // TODO make text dynamic
                 this.action.innerHTML = 'add dependency';
-                
+
                 var popup = this;
                 this.action.onclick = function() {
                 	var bar = popup.gantt.get_bar(options.task.id);
                 	bar.group.classList.toggle('addArrow');
-            		
+
                 	popup.gantt.dependencyBar = bar;
                 	popup.hide();
                 	};
@@ -1060,14 +1064,69 @@ class Popup {
             position_meta = options.target_element.getBBox();
         }
 
-        if (options.position === 'left') {
-            this.parent.style.left =
-                position_meta.x + (position_meta.width + 10) + 'px';
-            this.parent.style.top = position_meta.y + 'px';
+        var container_meta = gantt.getBoundingClientRect();
+        var svg_meta = this.gantt.$svg.getBoundingClientRect();
+        var relX = (position_meta.x + svg_meta.x) - container_meta.x;
+        var relY = (position_meta.y + svg_meta.y) - container_meta.y;
+        var popup_width = this.parent.offsetWidth;
+        var popup_height = this.parent.offsetHeight;
 
+        var exceeds_top = (relY - popup_height) < 0;
+        var exceeds_right = (relX + popup_width + position_meta.width) > container_meta.width;
+        var exceeds_bottom = (relY + popup_height + position_meta.height) > container_meta.height;
+        var exceeds_left = (relX - popup_width) < 0;
+
+        if(exceeds_top){
+          options.position = 'bottom';
+        }
+        if(exceeds_bottom){
+          options.position = 'top';
+        }
+        if(exceeds_left || (exceeds_top && exceeds_left) || exceeds_bottom && exceeds_left){
+          options.position = 'right';
+        }
+        if(exceeds_top && exceeds_right || exceeds_right || (exceeds_right && exceeds_bottom)){
+          options.position = 'left';
+        }
+
+
+        if (options.position === 'left') {
+            this.parent.style.left = position_meta.x - (this.parent.offsetWidth + 10) + 'px';
+            this.parent.style.top = position_meta.y - (10) + 'px';
+
+            this.pointer.style = null;
+            this.pointer.style.transform = 'rotateZ(270deg)';
+            this.pointer.style.right = '-12px';
+            this.pointer.style.top = '15px';
+        }
+
+        if (options.position === 'right') {
+            this.parent.style.left = position_meta.x + (position_meta.width + 10) + 'px';
+            this.parent.style.top = position_meta.y - (10) + 'px';
+
+            this.pointer.style = null;
             this.pointer.style.transform = 'rotateZ(90deg)';
             this.pointer.style.left = '-7px';
-            this.pointer.style.top = '2px';
+            this.pointer.style.top = '15px';
+        }
+
+        if (options.position === 'top') {
+            this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
+            this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
+
+            this.pointer.style = null;
+            this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+            this.pointer.style.bottom = '-12px';
+        }
+
+        if (options.position === 'bottom') {
+            this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
+            this.parent.style.top = position_meta.y + (position_meta.height + 10) + 'px';
+
+            this.pointer.style = null;
+            this.pointer.style.transform = 'rotateZ(180deg)';
+            this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+            this.pointer.style.top = '-12px';
         }
     }
 
@@ -1155,12 +1214,14 @@ class Gantt {
             date_format: 'YYYY-MM-DD',
             popup_trigger: 'click',
             custom_popup_html: null,
+            popup_position : 'right',
+            popup_in_bounds: true,
             language: 'en',
             // SJ make editing optional
             enable_drag_edit : true,
-        	enable_slide_edit : true,
-        	enable_progress_edit : true,
-        	enable_dependency_edit : true
+          	enable_slide_edit : true,
+          	enable_progress_edit : true,
+          	enable_dependency_edit : true
         };
         this.options = Object.assign({}, default_options, options);
     }
@@ -1746,7 +1807,7 @@ class Gantt {
             } else if (element.classList.contains('bar-wrapper') && this.options.enable_drag_edit) {
                 is_dragging = true;
             }
-            
+
             bar_wrapper.classList.add('active');
 
             // SJ use clientX and Y offset doesn't work properly in firefox
@@ -1825,7 +1886,7 @@ class Gantt {
                 bar.set_action_completed();
             });
         });
-        
+
         // SJ make changing progress optional
         if(this.options.enable_progress_edit){
         	this.bind_bar_progress();
@@ -1882,7 +1943,7 @@ class Gantt {
             is_resizing = false;
             if (!($bar_progress && $bar_progress.finaldx)) return;
             console.log("changed");
-            
+
             // SJ reset value, otherwise event fires multiple times
             $bar_progress.finaldx = 0;
             bar.progress_changed();
