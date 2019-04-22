@@ -1843,6 +1843,7 @@ class Gantt {
                 $bar.finaldx = this.get_snap_position(dx);
 
                 if (is_resizing_left) {
+                    this.hide_popup();
                     if (parent_bar_id === bar.task.id) {
                         bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx,
@@ -1854,6 +1855,7 @@ class Gantt {
                         });
                     }
                 } else if (is_resizing_right) {
+                    this.hide_popup();
                     if (parent_bar_id === bar.task.id) {
                         bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx
