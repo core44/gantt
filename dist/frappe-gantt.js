@@ -1057,6 +1057,7 @@ class Popup {
         // SJ fix popup overlaying bars
         this.parent.style.display = 'block';
 
+
         // set position
         let position_meta;
         if (target_element instanceof HTMLElement) {
@@ -1083,7 +1084,7 @@ class Popup {
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
-            position = 'top';
+            position = 'left';
           }else{
             return false;
           }
@@ -1095,30 +1096,13 @@ class Popup {
         }
       }
 
-      if (position === 'top' || auto) {
-        this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
-        this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
-        var popup_meta = this.parent.getBoundingClientRect();
-        if(this.exceeds_bounds(popup_meta, container_meta)){
-          if(auto) {
-            position = 'left';
-          }else{
-            return false;
-          }
-        }else{
-          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
-          this.pointer.style.bottom = '-12px';
-          return position;
-        }
-      }
-
       if (position === 'left' || auto) {
         this.parent.style.left = position_meta.x - (this.parent.offsetWidth + 10) + 'px';
         this.parent.style.top = position_meta.y - (10) + 'px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
-            position = 'bottom';
+            position = 'top';
           }else{
             return false;
           }
@@ -1130,13 +1114,30 @@ class Popup {
         }
       }
 
+      if (position === 'top' || auto) {
+        this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
+        this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
+        var popup_meta = this.parent.getBoundingClientRect();
+        if(this.exceeds_bounds(popup_meta, container_meta)){
+          if(auto) {
+            position = 'bottom';
+          }else{
+            return false;
+          }
+        }else{
+          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+          this.pointer.style.bottom = '-12px';
+          return position;
+        }
+      }
+
       if (position === 'bottom' || auto) {
         this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
         this.parent.style.top = position_meta.y + (position_meta.height + 10) + 'px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
-            //console.log('all postions OOB');
+            //console.log('All postions OOB');
           }else{
             return false;
           }
@@ -1153,7 +1154,7 @@ class Popup {
     exceeds_bounds(popup_meta, container_meta) {
       return popup_meta.left < container_meta.left || popup_meta.right > container_meta.right || popup_meta.top < container_meta.top || popup_meta.bottom > container_meta.bottom;
     }
-
+    
     hide() {
     	// SJ fix popup overlaying bars
     	this.parent.style.display = 'none';
