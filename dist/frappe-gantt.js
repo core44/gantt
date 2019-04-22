@@ -976,15 +976,15 @@ class Arrow {
         	this.to_task.task.dependencies.splice(index, 1);
         	this.element.remove();
         	this.gantt.setup_dependencies();
-			// fire dependencyAdded event
-			this.gantt.trigger_event('dependency_removed', [this.to_task.task]);
-		});
+    			// fire dependencyAdded event
+    			this.gantt.trigger_event('dependency_removed', [this.to_task.task]);
+    		});
         $.on(this.element, 'mouseenter', e => {
         	this.element.classList.add('hover');
-		});
+    		});
         $.on(this.element, 'mouseleave', e => {
-			this.element.classList.remove('hover');
-		});
+    			this.element.classList.remove('hover');
+    		});
     }
 }
 
@@ -1860,6 +1860,7 @@ class Gantt {
                         });
                     }
                 } else if (is_dragging) {
+                    this.hide_popup();
                     bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                 }
             });
@@ -1891,6 +1892,40 @@ class Gantt {
         if(this.options.enable_progress_edit){
         	this.bind_bar_progress();
         }
+
+
+        const slider = document.querySelector('.gantt-container');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+          if(!action_in_progress()){
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+          }
+        });
+        slider.addEventListener('mouseleave', () => {
+          isDown = false;
+          slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup', () => {
+          isDown = false;
+          slider.classList.remove('active');
+        });
+        slider.addEventListener('mousemove', (e) => {
+          if(!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          const walk = (x - startX) * 3; //scroll-fast
+          slider.scrollLeft = scrollLeft - walk;
+          //console.log(walk);
+        });
+
+
+
     }
 
     bind_bar_progress() {
