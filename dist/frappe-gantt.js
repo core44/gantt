@@ -1075,12 +1075,16 @@ class Popup {
 
     set_position(position, position_meta, auto) {
       var container_meta = gantt.getBoundingClientRect();
-      var oob;
-      this.pointer.style = null;
+
 
       if (position === 'right' || auto) {
+        this.pointer.style = null;
+
         this.parent.style.left = position_meta.x + (position_meta.width + 10) + 'px';
         this.parent.style.top = position_meta.y - (10) + 'px';
+        this.pointer.style.transform = 'rotateZ(90deg)';
+        this.pointer.style.left = '-7px';
+        this.pointer.style.top = '15px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
@@ -1089,16 +1093,18 @@ class Popup {
             return false;
           }
         }else{
-          this.pointer.style.transform = 'rotateZ(90deg)';
-          this.pointer.style.left = '-7px';
-          this.pointer.style.top = '15px';
           return position
         }
       }
 
       if (position === 'left' || auto) {
+        this.pointer.style = null;
+
         this.parent.style.left = position_meta.x - (this.parent.offsetWidth + 10) + 'px';
         this.parent.style.top = position_meta.y - (10) + 'px';
+        this.pointer.style.transform = 'rotateZ(270deg)';
+        this.pointer.style.right = '-12px';
+        this.pointer.style.top = '15px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
@@ -1107,16 +1113,17 @@ class Popup {
             return false;
           }
         }else{
-          this.pointer.style.transform = 'rotateZ(270deg)';
-          this.pointer.style.right = '-12px';
-          this.pointer.style.top = '15px';
           return position;
         }
       }
 
       if (position === 'top' || auto) {
+        this.pointer.style = null;
+
         this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
         this.parent.style.top = position_meta.y - (this.parent.offsetHeight + 10) + 'px';
+        this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+        this.pointer.style.bottom = '-12px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
@@ -1125,15 +1132,18 @@ class Popup {
             return false;
           }
         }else{
-          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
-          this.pointer.style.bottom = '-12px';
           return position;
         }
       }
 
       if (position === 'bottom' || auto) {
+        this.pointer.style = null;
+        
         this.parent.style.left = position_meta.x + ((position_meta.width / 2) - (this.parent.offsetWidth / 2)) + 'px';
         this.parent.style.top = position_meta.y + (position_meta.height + 10) + 'px';
+        this.pointer.style.transform = 'rotateZ(180deg)';
+        this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
+        this.pointer.style.top = '-12px';
         var popup_meta = this.parent.getBoundingClientRect();
         if(this.exceeds_bounds(popup_meta, container_meta)){
           if(auto) {
@@ -1142,9 +1152,6 @@ class Popup {
             return false;
           }
         }else{
-          this.pointer.style.transform = 'rotateZ(180deg)';
-          this.pointer.style.right = (this.parent.offsetWidth / 2) - 5 + 'px';
-          this.pointer.style.top = '-12px';
           return position;
         }
       }
@@ -1154,7 +1161,7 @@ class Popup {
     exceeds_bounds(popup_meta, container_meta) {
       return popup_meta.left < container_meta.left || popup_meta.right > container_meta.right || popup_meta.top < container_meta.top || popup_meta.bottom > container_meta.bottom;
     }
-    
+
     hide() {
     	// SJ fix popup overlaying bars
     	this.parent.style.display = 'none';
