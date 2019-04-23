@@ -156,7 +156,7 @@ $handle-color: #ddd !default;
 		padding: 0;
 		color: #959da5;
 		border-radius: 3px;
-
+		min-width: 200px;
 		.title {
 			border-bottom: 3px solid $blue;
 			padding: 10px;
@@ -183,7 +183,7 @@ $handle-color: #ddd !default;
 			position: absolute;
 			height: 5px;
 			margin: 0 0 0 -5px;
-			border: 5px solid transparent;
+			border: 6px solid transparent;
 			border-top-color: rgba(0, 0, 0, 0.8);
 		}
 	}
